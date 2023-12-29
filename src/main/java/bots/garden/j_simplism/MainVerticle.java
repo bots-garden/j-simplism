@@ -17,8 +17,13 @@ public class MainVerticle extends AbstractVerticle {
   public void start(Promise<Void> startPromise) throws Exception {
     System.out.println("📦 Loading wasm file...");
 
-    File wasmFile = new File("./hello.wasm");
+    File wasmFile = new File("./hello.wasi.wasm");
+
     Module module = Module.build(wasmFile);
+
+    // if wasm: Can't find opcode for op value 236
+    // if wasi: Can't find opcode for op value 204
+
     Instance instance = module.instantiate();
 
     ExportFunction helloFunction = instance.getExport("hello");
@@ -28,6 +33,7 @@ public class MainVerticle extends AbstractVerticle {
 
     vertx.createHttpServer().requestHandler(req -> {
 
+      // todo: manage concurrent access
       Memory memory = instance.getMemory();
       String message = "Bob Morane";
       int len = message.getBytes().length;
